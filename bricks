@@ -1,0 +1,13 @@
+def create_bricks(self):
+        y_ofs = 35
+        self.bricks = []
+        for i in range(7):
+            x_ofs = 35
+            for j in range(8):
+                self.bricks.append(pygame.Rect(x_ofs,y_ofs,BRICK_WIDTH,BRICK_HEIGHT))
+                x_ofs += BRICK_WIDTH + 10
+            y_ofs += BRICK_HEIGHT + 5
+
+    def draw_bricks(self):
+        for brick in self.bricks:
+            pygame.draw.rect(self.screen, BRICK_COLOR, brick)
