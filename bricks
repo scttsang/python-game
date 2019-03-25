@@ -1,3 +1,5 @@
+self.create_bricks()
+
 def create_bricks(self):
         y_ofs = 35
         self.bricks = []
