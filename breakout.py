@@ -57,8 +57,10 @@ class Vector:
     
     # Adds another vector to this vector
     def add(self, other):
-        self.x += other.x
-        self.y += other.y
+        if other.x != 0:
+            self.x += other.x
+        if other.y != 0:
+            self.y += other.y
         return self
 
     def __add__(self, other):
@@ -141,8 +143,7 @@ class Vector:
     def angle(self, other):
         pass
 
-# Start the frame animation
-frame.start()
+
 
 class Wall:
     def __init__(self, x, border, color):
@@ -204,17 +205,22 @@ class Ball:
 
         
         
-        
+#i have added to the interaction class by adding the player to it so the player stops when they heit one of the walls
+#need to make the balls bounce off of the player.
 class Interaction:
     def __init__(self):
         self.balls = []
         self.walls = []
+        self.player = []
     
     def addWall(self, wall):
         self.walls.append(wall)
 
     def addBall(self, ball):
         self.balls.append(ball)
+        
+    def addPlayer(self, player):
+        self.player.append(player)
 
     def update(self):
         for ball in self.balls:
@@ -222,6 +228,13 @@ class Interaction:
             for wall in self.walls:
                 if wall.hit(ball):
                     ball.bounce(wall.normal)
+                    
+        for player in self.player:
+            player.update()
+            for wall in self.walls:
+                if wall.hit(player):
+                    stop = (0,0)
+                    player.move(Vector(stop))
         
     def draw(self, canvas):
         self.update()
@@ -229,16 +242,82 @@ class Interaction:
             wall.draw(canvas)
         for ball in self.balls:
             ball.draw(canvas)
+        for player in self.player:
+            player.draw(canvas)
+            
+            
+#i have added a player class that draws and controls the players movement similar to the way that the balls work
+class Player:
+    
+    def __init__(self, pos):
+        self.pos = pos
+        vel = (0,0)
+        self.width = 30
+        self.vel = Vector(vel)
+        self.border = 1
+        self.color = 'red'
+        
+        
+        
+        
+    def offsetL(self):
+        return self.pos.x - self.width
+       
+    def offsetR(self):
+        return self.pos.x + self.width
+    
+    def move(self, other):
+        speed = 7
+        self.vel = other
+        self.vel.multiply(speed)
+    def update(self):
+        
+        player.pos.add(self.vel)
+        
+        if self.pos.y + self.width < 0:
+            self.pos.y = CANVAS_HEIGHT + self.radius
+        elif self.pos.y - self.width > CANVAS_HEIGHT:
+            self.pos.y = -self.width
+
+    def draw(self, canvas):
+        a = self.pos.x - self.width
+        b = self.pos.y - 5
+        c = self.pos.x + self.width
+        d = self.pos.y
+        canvas.draw_polygon([(a, b), (a, d), (c, d), (c, b)], self.border, self.color, self.color)
+        
+        
+    def bounce(self, normal):
+        self.vel.reflect(normal)
+#i have added eventhandlers to detect when the player has pressed 
+#an arrow key and when they let go of a key.
+def keydown(key):
+    left = (-1,0)
+    right = (1,0)
+    
+    if key == simplegui.KEY_MAP['right']:
+        player.move(Vector(right))
+    elif key == simplegui.KEY_MAP['left']:
+        player.move(Vector(left))
+        
+def keyup(key):
+    stop = (0,0)
+    player.move(Vector(stop))
         
 CANVAS_WIDTH = 600
 CANVAS_HEIGHT = 300
         
 i = Interaction()
 
-p = (300,300)
+p = (300,200)
 v = (5,-1)
 b1 = Ball(Vector(p), Vector(v), 20, 0, 'blue')
+
+p = (300,300)
+player = Player(Vector(p))
+
 i.addBall(b1)
+i.addPlayer(player)
 
 p = (300,100)
 v = (-7.5,3)
@@ -255,6 +334,8 @@ i.addWall(w2)
 # Create a frame and assign callbacks to event handlers
 frame = simplegui.create_frame("ball-wall", CANVAS_WIDTH, CANVAS_HEIGHT)
 frame.set_draw_handler(i.draw)
+frame.set_keydown_handler(keydown)
+frame.set_keyup_handler(keyup)
 
 # Start the frame animation
 frame.start()
